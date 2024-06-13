@@ -1,30 +1,37 @@
 
 FONTES = gdb.c uart.c boot.s  
+LDSCRIPT = kernel.ld
+RPICPU = bcm2836
+PROJECT = gdbstub
 
 #
 # Arquivos de saída 
 #
-EXEC = kernel.elf
-MAP = kernel.map
-IMAGE = kernel.img
-HEXFILE = kernel.hex
-LIST = kernel.list
+EXEC = ${PROJECT}.elf
+MAP = ${PROJECT}.map
+IMAGE = ${PROJECT}.img
+HEXFILE = ${PROJECT}.hex
+LIST = ${PROJECT}.list
 
 PREFIXO = arm-none-eabi-
-LDSCRIPT = kernel.ld
 AS = ${PREFIXO}as
 LD = ${PREFIXO}ld
 GCC = ${PREFIXO}gcc
 OBJCPY = ${PREFIXO}objcopy
 OBJDMP = ${PREFIXO}objdump
 
-# Para RPi Zero
-#OPTS = -mfpu=vfp -march=armv6zk -mtune=arm1176jzf-s -g 
+ifeq (${RPICPU}, bcm2836)
+	# Raspberry Pi v.2 ou v.3
+	ASMOPTIONS = -g --defsym RPICPU=2
+	COPTIONS = -march=armv7-a -mtune=cortex-a7 -g -D RPICPU=2
+else
+	ifeq (${RPICPU}, bcm2835)
+  		# Raspberry Pi v.0 ou v.1
+   	ASMOPTIONS = -march=armv6zk -g --defsym RPICPU=0
+   	COPTIONS = -march=armv6zk -mtune=arm1176jzf-s -g -D RPICPU=0
+	endif
+endif
 
-#Para PPi 2
-OPTS = -march=armv7-a -mtune=cortex-a7 -g 
-
-#LDOPTS = -L/usr/lib/arm-none-eabi/newlib -lc -lm
 OBJ = $(FONTES:.s=.o)
 OBJETOS = $(OBJ:.c=.o)
 
@@ -58,13 +65,13 @@ ${LIST}: ${EXEC}
 # Compilar arquivos em C
 #
 .c.o:
-	${GCC} ${OPTS} -c -o $@ $<
+	${GCC} ${COPTIONS} -c -o $@ $<
 
 #
 # Montar arquivos em assembler
 #
 .s.o:
-	${AS} -g -o $@ $<
+	${AS} ${ASMOPTIONS} -o $@ $<
 
 #
 # Limpar tudo

@@ -16,8 +16,17 @@
 /*
  * Endereços dos periféricos
  */
+#ifndef RPICPU
+#error Versão do Raspberry pi não definida
+#endif
+
+#if RPICPU == 2
 #define PERIPH_BASE  0x3f000000
-//#define PERIPH_BASE  0x20000000
+#elif RPICPU == 0
+#define PERIPH_BASE  0x20000000
+#else
+#endif
+
 #define GPIO_ADDR    (PERIPH_BASE + 0x200000)
 #define AUX_ADDR     (PERIPH_BASE + 0x215000)
 #define AUX_MU_ADDR  (PERIPH_BASE + 0x215040)

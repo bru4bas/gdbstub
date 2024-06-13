@@ -39,8 +39,10 @@ start:
  */
 .text
 reset:
+.if RPICPU == 2
   /*
    * Verifica priviégio de execução EL2 (HYP) ou EL1 (SVC)
+   * Somente para Raspberry Pi 2 e 3
    */
   mrs r0, cpsr
   and r0, r0, #0x1f
@@ -65,14 +67,10 @@ continua:
   mrc p15,0,r0,c0,c0,5    // registrador MPIDR
   ands r0, r0, #0xff
   beq core0
-
-// Núcleos #1, #2 e #3 vão executar a partir daqui
-
-trava:
-  wfe
   b trava
 
 // Execução do núcleo #0
+.endif
 core0:
   /*
    * configura os stack pointers
@@ -167,6 +165,13 @@ switch_back:
    ldr lr, [r0, #60]      // endereço de retorno
    ldr r0, [r0]           // r0 do usuário
    movs pc, lr            // retorna
+
+/*
+ * Suspende o núcleo
+ */
+trava:
+  wfe
+  b trava
 
 /*
  * Suspende o processamento por um número de ciclos

@@ -6,6 +6,7 @@
 
 #include "uart.h"
 #include <stdbool.h>
+void delay(unsigned);
 
 /*
  * Sinais reconhecidos pelo GDB
